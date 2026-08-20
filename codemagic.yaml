@@ -3,17 +3,25 @@ workflows:
     name: Android APK Build
     max_build_duration: 60
     instance_type: mac_mini_m1
+    environment:
+      vars:
+        JAVA_VERSION: "17"
     scripts:
       - name: Build Android APK
         script: |
-          cd app || cd android || true
-          
-          # Force download and upgrade to Gradle 9.3.1
-          wget https://gradle.org -P /tmp
-          unzip -q /tmp/gradle-9.3.1-bin.zip -d /tmp
-          export PATH=/tmp/gradle-9.3.1/bin:$PATH
-          
+          # Locate the true project directory containing settings.gradle / build.gradle
+          TARGET_DIR=$(find . -name "settings.gradle" -o -name "settings.gradle.kts" | head -n 1 | xargs dirname)
+          if [ -n "$TARGET_DIR" ] && [ "$TARGET_DIR" != "." ]; then
+            cd "$TARGET_DIR"
+          fi
+
+          # Update the internal wrapper configuration to use Gradle 8.10 safely
+          if [ -f "gradle/wrapper/gradle-wrapper.properties" ]; then
+            sed -i '' 's|distributionUrl=.*|distributionUrl=https\\://services.gradle.org/distributions/gradle-8.10-bin.zip|' gradle/wrapper/gradle-wrapper.properties
+          fi
+
+          # Execute the build via the local wrapper
           chmod +x gradlew || true
-          gradle assembleRelease
+          ./gradlew assembleRelease --no-daemon
     artifacts:
       - "**/build/outputs/apk/**/*.apk"
