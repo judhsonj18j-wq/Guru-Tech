@@ -1,0 +1,6 @@
+{
+  "name": "Guru Tech",
+  "description": "Smart educational portal featuring role-based dashboards for Teachers, Parents, and Students with live grievance tracking, attendance analytics, document management, and universal bypass login.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
