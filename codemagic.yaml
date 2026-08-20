@@ -7,7 +7,13 @@ workflows:
       - name: Build Android APK
         script: |
           cd app || cd android || true
+          
+          # Force download and upgrade to Gradle 9.3.1
+          wget https://gradle.org -P /tmp
+          unzip -q /tmp/gradle-9.3.1-bin.zip -d /tmp
+          export PATH=/tmp/gradle-9.3.1/bin:$PATH
+          
           chmod +x gradlew || true
-          ./gradlew assembleRelease || gradle assembleRelease
+          gradle assembleRelease
     artifacts:
       - "**/build/outputs/apk/**/*.apk"
