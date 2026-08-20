@@ -9,19 +9,17 @@ workflows:
     scripts:
       - name: Build Android APK
         script: |
-          # Locate the true project directory containing settings.gradle / build.gradle
-          TARGET_DIR=$(find . -name "settings.gradle" -o -name "settings.gradle.kts" | head -n 1 | xargs dirname)
-          if [ -n "$TARGET_DIR" ] && [ "$TARGET_DIR" != "." ]; then
+          # Dynamically look for where your source code folder lives
+          TARGET_DIR=$(find . -name "build.gradle" -o -name "build.gradle.kts" | head -n 1 | xargs dirname)
+          if [ -n "$TARGET_DIR" ]; then
             cd "$TARGET_DIR"
           fi
 
-          # Update the internal wrapper configuration to use Gradle 8.10 safely
-          if [ -f "gradle/wrapper/gradle-wrapper.properties" ]; then
-            sed -i '' 's|distributionUrl=.*|distributionUrl=https\\://services.gradle.org/distributions/gradle-8.10-bin.zip|' gradle/wrapper/gradle-wrapper.properties
-          fi
+          # Force generate a brand new Gradle wrapper so gradlew exists
+          gradle wrapper --gradle-version 8.10
 
-          # Execute the build via the local wrapper
-          chmod +x gradlew || true
+          # Clean and compile the APK file
+          chmod +x gradlew
           ./gradlew assembleRelease --no-daemon
     artifacts:
       - "**/build/outputs/apk/**/*.apk"
